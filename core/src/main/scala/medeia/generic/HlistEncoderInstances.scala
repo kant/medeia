@@ -5,6 +5,7 @@ import medeia.generic.util.VersionSpecific.Lazy
 import org.mongodb.scala.bson.BsonDocument
 import shapeless.labelled.FieldType
 import shapeless.{::, HList, HNil, Witness}
+import scala.util.chaining._
 
 trait HlistEncoderInstances {
   implicit def hnilEncoder[Base]: ShapelessEncoder[Base, HNil] =
@@ -22,7 +23,8 @@ trait HlistEncoderInstances {
       {
         val head = hEncoder.value.encode(hlist.head)
         val tail: BsonDocument = tEncoder.encode(hlist.tail)
-        tail.append(fieldName, head)
+
+        BsonDocument((fieldName, head)).tap(_.putAll(tail))
       }
   }
 }
